@@ -54,4 +54,3 @@ fonksiyon BasarisizDagitimTelafisi(hesap, islemId, dagitimPlani):
   aksi halde:
     // Geri ödeme başarısızsa, müşteri hizmetleri bilgilendirilir
     SorunKaydiOlustur(hesap.id, islemId, dagitimPlani)
-

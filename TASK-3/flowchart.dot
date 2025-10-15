@@ -1,0 +1,64 @@
+digraph HastaneRandevuSistemi {
+    // Genel Ayarlar
+    rankdir=TB; // Akış Yönü: Yukarıdan Aşağıya
+    node [shape=box, style=filled, fillcolor="#E0F7FA"];
+
+    // 1. Ana Program ve Giriş Düğümleri
+    AnaProgram [label="PROGRAM_CALIS() (Ana Menü)", shape=Mdiamond, fillcolor="#BBDEFB"];
+    GirisYap [label="Giris_Yap()", fillcolor="#C8E6C9"];
+    RandevuAl [label="Randevu_Al()", fillcolor="#B3E5FC"];
+    RandevuGor [label="Randevularimi_Goruntule()", fillcolor="#FFFDE7"];
+    RandevuIptal [label="Randevu_Iptal_Et()", fillcolor="#FFCDD2"];
+
+    // 2. Kontrol ve Veri Manipülasyonu Fonksiyonları (Sistem İçi)
+    MusaitKontrol [label="Randevu_Musait_Mi(DoktorID, TarihSaat)", shape=oval, fillcolor="#FFE0B2"];
+    SaatBul [label="Mevcut_Musait_Randevu_Saatlerini_Bul(DoktorID)", shape=oval, fillcolor="#FFE0B2"];
+    VeriKayit [label="Veri Kayıtları\n(HASTALAR, DOKTORLAR, RANDEVULAR)", shape=cylinder, fillcolor="#E3F2FD"];
+    
+    // 3. Kontrol Kararları
+    GirisKontrol [label="Giriş Yapılmış Mı? (GirisYapmisKullaniciID)", shape=diamond, fillcolor="#F8BBD0"];
+    MusaitlikKarar [label="Randevu Müsait Mi?", shape=diamond, fillcolor="#F8BBD0"];
+    
+    // Bağlantılar (Akış)
+
+    // A. Ana Program Akışı
+    AnaProgram -> GirisYap [label="Seçim 1"];
+    AnaProgram -> RandevuAl [label="Seçim 2"];
+    AnaProgram -> RandevuGor [label="Seçim 3"];
+    AnaProgram -> RandevuIptal [label="Seçim 4"];
+    
+    // B. Giriş ve Veri Erişim Akışı
+    GirisYap -> VeriKayit [label="Hasta Kontrolü/Oturum Açma"];
+    GirisYap -> RandevuAl [label="Başarılı Giriş"];
+    
+    // C. Randevu Alma Akışı (Randevu_Al prosedürünün içi)
+    RandevuAl -> GirisKontrol [label="Başlangıç Kontrolü"];
+    
+    // Randevu almadan önce giriş yapılmalı
+    GirisKontrol -> RandevuAl [label="Evet"];
+    GirisKontrol -> AnaProgram [label="Hayır (Hata)", style=dashed, color=red];
+    
+    // Doktor seçimi ve müsait saat bulma
+    RandevuAl -> VeriKayit [label="Uzmanlık Alanına Göre Doktor Filtreleme"];
+    RandevuAl -> SaatBul [label="Seçilen Doktor İçin Saatleri İste"];
+    
+    // Müsaitlik kontrolü ve randevu oluşturma
+    SaatBul -> RandevuAl [label="Müsait Saat Listesi Döndür"];
+    RandevuAl -> MusaitKontrol [label="Seçilen Saati Kontrol Et"];
+    
+    // Randevuyu kaydetme kararı
+    MusaitKontrol -> MusaitlikKarar;
+    MusaitlikKarar -> VeriKayit [label="Evet (Yeni Randevuyu EKLE)", style=bold, color=green];
+    MusaitlikKarar -> RandevuAl [label="Hayır (Hata)", style=dashed, color=red];
+
+    // D. Görüntüleme ve İptal Akışı
+    RandevuGor -> GirisKontrol; // İptal ve Görüntüleme, önce giriş ister
+    RandevuGor -> VeriKayit [label="Kullanıcıya Ait Randevuları Çek"];
+    
+    RandevuIptal -> RandevuGor [label="Önce Randevuları Göster"];
+    RandevuIptal -> VeriKayit [label="Randevuyu KALDIR", style=bold, color=red];
+    
+    // E. Fonksiyon Çağrılarının Detayı
+    MusaitKontrol -> VeriKayit [label="Randevu Listesini Sorgula"];
+    SaatBul -> VeriKayit [label="Çalışma Saatlerini ve Randevuları Sorgula"];
+}

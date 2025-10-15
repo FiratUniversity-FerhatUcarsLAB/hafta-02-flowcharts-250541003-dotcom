@@ -1,0 +1,56 @@
+digraph AlisverisSepetiAkisi {
+    // Genel Ayarlar
+    rankdir=TB; // Akış Yönü: Yukarıdan Aşağıya (Top to Bottom)
+    node [shape=box, style=filled, fillcolor="#E0F7FA"]; // Tüm düğümler için kutu şekli ve dolgu
+
+    // Başlangıç ve Veri Düğümleri
+    Baslangic [label="Sistem Başlangıcı\n(Veri Yapılarını Yükle)", shape=Mdiamond, fillcolor="#BBDEFB"];
+    SepetData [label="SEPET: Liste<SEPET_KALEMI>\nURUN_KATALOGU", shape=cylinder, fillcolor="#FFFDE7"];
+
+    // Ana Prosedürler (Kullanıcı İşlemleri)
+    Ekle [label="Sepete_Urun_Ekle(ID, Miktar)", fillcolor="#C8E6C9"];
+    Guncelle [label="Miktari_Guncelle(ID, YeniMiktar)", fillcolor="#C8E6C9"];
+    Cikar [label="Sepetten_Urun_Cikar(ID)", fillcolor="#FFCDD2"];
+    Hesapla [label="Sepet_Toplam_Tutari_Hesapla()", shape=oval, fillcolor="#FFE0B2"];
+    Goster [label="Sepeti_Goster()", fillcolor="#B3E5FC"];
+
+    // Detay/Kontrol Düğümleri (Ekleme Prosedürü İçi)
+    KatalogKontrol [label="Ürün Katalogda Var Mı?", shape=diamond, fillcolor="#F8BBD0"];
+    SepetKontrol [label="Sepette Zaten Var Mı?", shape=diamond, fillcolor="#F8BBD0"];
+    MiktarKontrol [label="Miktar <= 0 mı?", shape=diamond, fillcolor="#F8BBD0"];
+
+    // Bağlantılar (Akış)
+
+    // Başlangıçtan Ana Fonksiyonlara (Sistemin Kullanıma Açılması)
+    Baslangic -> SepetData [label="Veri Yükleme"];
+    SepetData -> Ekle;
+    SepetData -> Guncelle;
+    SepetData -> Cikar;
+    SepetData -> Goster;
+
+    // 1. Sepete Ekleme Akışı
+    Ekle -> KatalogKontrol;
+    KatalogKontrol -> SepetKontrol [label="Var (Evet)"];
+    KatalogKontrol -> Goster [label="Yok (Hata)", style=dashed, color=red];
+
+    SepetKontrol -> Ekle [label="Var (Miktar Güncelle)"]; // Kendine döner (dahili işlem)
+    SepetKontrol -> SepetData [label="Yok (Yeni Kalem Ekle)", style=bold, color=green];
+
+    // 2. Miktar Güncelleme Akışı
+    Guncelle -> MiktarKontrol;
+    MiktarKontrol -> Cikar [label="Evet (Miktar 0 Veya Altı)"]; // Miktar 0'a inerse çıkarma prosedürüne yönlendirir
+    MiktarKontrol -> SepetData [label="Hayır (Miktar Güncelle)", style=bold, color=green];
+
+    // 3. Çıkarma Akışı
+    Cikar -> SepetData [label="Listeden Kaldır", style=bold, color=red];
+
+    // 4. Toplam Hesaplama Akışı
+    // Hesaplama fonksiyonu genellikle Görüntüleme veya Ödeme aşamasında çağrılır
+    Goster -> Hesapla [label="Toplamı Hesapla"];
+    Hesapla -> Goster [label="Değeri Döndür"];
+    
+    // İşlem Sonuçları
+    Ekle -> Goster [label="Başarılı Ekleme/Güncelleme"];
+    Guncelle -> Goster [label="Başarılı Güncelleme"];
+    Cikar -> Goster [label="Başarılı Kaldırma"];
+}

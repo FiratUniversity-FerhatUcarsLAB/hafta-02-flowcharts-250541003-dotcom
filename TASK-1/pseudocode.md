@@ -1,56 +1,50 @@
-fonksiyon PINiDogrula(kart, girilenPIN):
-  kayitliHash = kartIcinPinHashGetir(kart)
-  geriDondur hash(girilenPIN) == kayitliHash
+FONKSİYON ATM_ParaCekme_Islemi():
 
-fonksiyon ParaDagitimPlaniniHesapla(nakitEnvanteri, miktar):
-  // Açgözlü algoritma: büyükten küçüğe sayarak, envanteri dikkate al
-  kalan = miktar
-  plan = boş harita (banknot -> adet)
+  EKRANA_YAZ("Kartınızı takınız...")
+  kart = KART_OKUYUCU_OKU()
 
-  için banknot in NOMINASYONLAR: // büyükten küçüğe sırayla
-    gerekenMax = taban(kalan / banknot)
-    mevcut = nakitEnvanteri[banknot] // yoksa 0 say
-    kullanilacak = min(gerekenMax, mevcut)
-    eğer kullanilacak > 0 ise:
-      plan[banknot] = kullanilacak
-      kalan = kalan - (kullanilacak * banknot)
+  EĞER kart GEÇERSİZSE:
+    EKRANA_YAZ("Geçersiz kart. Lütfen tekrar deneyin.")
+    KART_IADE_ET()
+    ÇIKIŞ
 
-  eğer kalan == 0:
-    geriDondur plan
+  // PIN doğrulama
+  denemeSayısı = 0
+  DOĞRULANDI = FALSE
 
-  // Açgözlü algoritma başarısızsa, daha derin (backtracking / dinamik programlama) dene
-  eğer AlternatifDagitimBul(nakitEnvanteri, miktar, plan):
-    geriDondur bulunanPlan
-  aksi halde:
-    geriDondur BASARISIZ
+  TEKRAR PIN doğrulanana kadar VEYA denemeSayısı < MAX_PIN_DENEMESİ:
+    girilenPIN = KULLANICIDAN_AL("PIN giriniz:")
+    EĞER PIN_DOGRULA(kart, girilenPIN):
+      DOĞRULANDI = TRUE
+      DUR
+    DEĞİLSE:
+      denemeSayısı = denemeSayısı + 1
+      EKRANA_YAZ("Hatalı PIN. Kalan deneme: " + (MAX_PIN_DENEMESİ - denemeSayısı))
 
-fonksiyon AlternatifDagitimBul(nakitEnvanteri, miktar, mevcutPlan):
-  // Sınırlandırılmış backtracking: sınırlı sayıda kombinasyonu dener
-  // Uygun bir dağılım bulunursa, mevcutPlan doldurulur ve true döner
-  ...
+  EĞER DOĞRULANDI == FALSE:
+    EKRANA_YAZ("3 kez hatalı PIN. Kart bloke edildi.")
+    KART_BLOKE_ET(kart)
+    KART_IADE_ET()
+    ÇIKIŞ
 
-fonksiyon BankadanTahsilatIstegi(gonderenHesapId, miktar):
-  // Banka API çağrısı: tahsilat (debit)
-  cevap = BankaAPI.tahsilEt(gonderenHesapId, miktar)
-  eğer cevap.durum == "TAMAM":
-    geriDondur cevap.islemId
-  aksi halde:
-    geriDondur BASARISIZ
+  // Hesap seçimi
+  hesap = KULLANICIDAN_AL("İşlem yapmak istediğiniz hesabı seçin:")
 
-fonksiyon NakitDagit(dagitimPlani):
-  // Donanımla iletişim: her banknot türü için dağıtım komutları gönder
-  için banknot, adet in dagitimPlani:
-    sonuc = NakitMekanizmasi.dagit(banknot, adet)
-    eğer sonuc != TAMAM:
-      // Hangi banknotun verilip verilmediğini raporla
-      geriDondur false
-  geriDondur true
+  // Menü
+  işlem = KULLANICIDAN_AL("1. Para Çekme\n2. Bakiye Sorgulama\n3. Çıkış")
 
-fonksiyon BasarisizDagitimTelafisi(hesap, islemId, dagitimPlani):
-  // Bankadan para tahsil edilmişse, geri ödeme (reversal) istenir
-  geriOdeme = BankaAPI.geriAl(islemId)
-  eğer geriOdeme.durum == "TAMAM":
-    OlayKaydiEkle("GERI_ODEME_TAMAM", hesap.id, islemId)
-  aksi halde:
-    // Geri ödeme başarısızsa, müşteri hizmetleri bilgilendirilir
-    SorunKaydiOlustur(hesap.id, islemId, dagitimPlani)
+  EĞER işlem == 1:
+    PARA_CEKME_ISLEMI(hesap)
+
+  EĞER işlem == 2:
+    bakiye = HESAP_BAKİYE_GETIR(hesap)
+    EKRANA_YAZ("Bakiyeniz: " + bakiye + " TL")
+
+  EĞER işlem == 3:
+    EKRANA_YAZ("İyi günler.")
+    KART_IADE_ET()
+    ÇIKIŞ
+
+  KART_IADE_ET()
+
+

@@ -1,3 +1,2 @@
-
-
-sistemin kısa açıklaması (maks. 5-6 satır)
+MELİKE KEKE 250541003
+Oluşturduğumuz bu iki içerik, farklı alanlardaki kodlama ve standart bilgisini bir araya getiriyor. Öncelikle, bir yazılım projesi için temel oluşturan Hastane Randevu Sistemi Sözde Kodu'nu Türkçe olarak hazırladık; bu kod, kullanıcı girişi, randevu alma ve iptal etme gibi temel iş akışlarını adım adım gösteren mantıksal bir taslaktır. İkinci olarak, teknik bir standart olan DOT Kodu'nun yapısını inceledik ve lastiğin üretim yeri, özellikle de yaşını belirten son dört haneli üretim tarihi bilgisini nasıl okuyacağımızı açıkladık. Böylece, bir yandan bilişim sisteminin (sözde kod) altyapısını anlarken, diğer yandan küresel bir ulaşım standardının (DOT kodu) kritik verilerini çözümlemiş olduk.

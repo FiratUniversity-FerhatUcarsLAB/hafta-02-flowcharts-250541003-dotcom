@@ -1,3 +1,3 @@
-
-
-sistemin kısa açıklaması (maks. 5-6 satır)
+Melike Keke 
+250541003
+Kapsamlı bir Akıllı Ev Güvenlik Sistemi için algoritma ve yapılandırma sürecini başarıyla tamamladık. İlk aşamada, sistemin sensör okuma, durum yönetimi ("DEVREDE", "ALARM") ve kullanıcı komutlarını içeren Türkçe ve detaylı Pseudocode (Sözde Kod)'unu yazdık. Ardından, bu mantıksal akışı görselleştirmek amacıyla, sistemin ana durumlarını ve geçişlerini gösteren bir akış şeması için DOT (Graph Description Language) kodunu oluşturduk. Bu iki aşamalı çalışma, sistemin hem kodsal mantığını hem de durum makinesi mimarisini net bir şekilde tanımlamıştır. Bu adımlarla güvenlik sisteminin temel işlevselliği eksiksizce belirlenmiştir.

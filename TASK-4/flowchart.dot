@@ -1,0 +1,98 @@
+// Üniversite Ders Kayıt Sistemi Akış Şeması (DOT Kodu)
+digraph DersKayitSistemi {
+    
+    // Genel ayarlar
+    rankdir=TB; // Akış yönü: Yukarıdan Aşağıya (Top to Bottom)
+    node [shape=box, style=filled, fillcolor="#F9F9F9"];
+    
+    // Düğüm Tanımlamaları (İşlem Basamakları)
+    start [shape=Mdiamond, label="SİSTEM BAŞLAT", fillcolor="#CCFFCC"];
+    
+    // 1. Kimlik Doğrulama
+    auth_loop [shape=circle, label="1\nKİMLİK DOĞRULAMA", fillcolor="#FFFFCC"];
+    input_login [shape=parallelogram, label="Öğrenci No / Şifre Girişi"];
+    check_login [shape=diamond, label="Giriş Başarılı mı?"];
+    
+    // 2. Kayıt Dönemi Kontrolü
+    check_period [shape=diamond, label="Kayıt Dönemi Açık mı?"];
+    
+    // 3. Ders Seçim Döngüsü
+    init_selection [label="Ders Listesi Göster / Seçim Başlat"];
+    input_course [shape=parallelogram, label="Ders Kodu / 'TAMAM' Girişi"];
+    check_finish [shape=diamond, label="'TAMAM' mı?"];
+    
+    // Kontrol Adımları
+    check_prereq [shape=diamond, label="Önkoşullar Sağlanıyor mu?"];
+    check_quota [shape=diamond, label="Kontenjan Var mı?"];
+    check_conflict [shape=diamond, label="Saat Çakışması Var mı?"];
+    add_temp [label="Dersi Geçici Listeye Ekle", fillcolor="#CCE5FF"];
+    
+    // 4. Onay
+    review [label="Seçilen Dersleri Gözden Geçirme"];
+    input_confirm [shape=parallelogram, label="Kayıt Onayı (Evet/Hayır)"];
+    check_confirm [shape=diamond, label="Onay 'Evet' mi?"];
+    
+    // 5. Sonuç ve Kayıt
+    save_record [label="Veritabanına Kaydet & Kontenjan Güncelle", fillcolor="#99FF99"];
+    end_success [shape=Mdiamond, label="KAYIT BAŞARILI", fillcolor="#33FF33"];
+    
+    // Hata/İptal Durumları
+    fail_login [label="Hata: Şifre Yanlış"];
+    fail_period [shape=box, label="Hata: Dönem Kapalı", fillcolor="#FFCCCC"];
+    fail_prereq [label="Hata: Önkoşul Yok", fillcolor="#FFCCCC"];
+    fail_quota [label="Hata: Kontenjan Dolu", fillcolor="#FFCCCC"];
+    fail_conflict [label="Hata: Saat Çakışması", fillcolor="#FFCCCC"];
+    cancel [shape=box, label="Kayıt İptal Edildi", fillcolor="#FFCCCC"];
+    
+    end_final [shape=Mdiamond, label="SİSTEM SONLANDIR", fillcolor="#FF9999"];
+    
+    // Akış Bağlantıları
+    
+    // Başlangıç ve Kimlik Doğrulama
+    start -> auth_loop;
+    auth_loop -> input_login;
+    input_login -> check_login;
+    check_login -> check_period [label="Evet"];
+    check_login -> fail_login [label="Hayır"];
+    fail_login -> auth_loop;
+    
+    // Dönem Kontrolü
+    check_period -> init_selection [label="Açık"];
+    check_period -> fail_period [label="Kapalı"];
+    fail_period -> end_final;
+    
+    // Ders Seçim Döngüsü
+    init_selection -> input_course;
+    input_course -> check_finish;
+    
+    // Seçim Devam Ediyor
+    check_finish -> check_prereq [label="Hayır (Ders Seçildi)"];
+    
+    // Kontroller
+    check_prereq -> check_quota [label="Evet"];
+    check_prereq -> fail_prereq [label="Hayır"];
+    fail_prereq -> input_course;
+    
+    check_quota -> check_conflict [label="Var"];
+    check_quota -> fail_quota [label="Yok"];
+    fail_quota -> input_course;
+    
+    check_conflict -> add_temp [label="Yok"];
+    check_conflict -> fail_conflict [label="Var"];
+    fail_conflict -> input_course;
+    
+    add_temp -> input_course [label="Döngü Devam"];
+    
+    // Onay ve Kayıt
+    check_finish -> review [label="Evet ('TAMAM')"];
+    review -> input_confirm;
+    input_confirm -> check_confirm;
+    
+    check_confirm -> save_record [label="Evet"];
+    check_confirm -> cancel [label="Hayır"];
+    
+    save_record -> end_success;
+    end_success -> end_final;
+    cancel -> end_final;
+    
+}

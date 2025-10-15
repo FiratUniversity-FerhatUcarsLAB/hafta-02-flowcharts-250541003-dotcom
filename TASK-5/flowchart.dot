@@ -1,0 +1,52 @@
+digraph AkilliEvGuvenlikSistemi {
+    // Grafik ayarları
+    rankdir=LR; // Sol-sağ yönünde sıralama
+    node [shape=box, style="filled", fillcolor="#F0F8FF"]; // Düğüm (durum) varsayılan stili
+    edge [fontname="Arial", fontsize=10]; // Kenar (geçiş) varsayılan stili
+
+    // 1. Ana Durumlar
+    // Başlangıç durumu
+    DEVRE_DISI [label="DEVRE DIŞI\n(Pasif)", fillcolor="#FFFFE0", shape=doublecircle];
+    
+    // Sistem aktif, normal çalışma
+    DEVREDE [label="DEVREDE\n(Aktif Gözetim)", fillcolor="#90EE90"];
+    
+    // İhlal algılandı, alarm aktif
+    ALARM [label="ALARM\n(Tehlike Tespit Edildi)", fillcolor="#F08080", shape=octagon];
+
+    // 2. Durum Geçişleri (Kullanıcı Komutları)
+
+    // DEVRE_DISI -> DEVREDE
+    DEVRE_DISI -> DEVREDE [label="Kullanıcı: KUR\n(Şifre Doğru)", color="green", penwidth=2];
+
+    // DEVREDE -> DEVRE_DISI
+    DEVREDE -> DEVRE_DISI [label="Kullanıcı: KALDIR\n(Şifre Doğru)", color="green", penwidth=2];
+    
+    // ALARM -> DEVRE_DISI
+    ALARM -> DEVRE_DISI [label="Kullanıcı: KALDIR\n(Şifre Doğru)\n& Alarm Kapatma", color="darkgreen", penwidth=3];
+
+    // 3. Durum Geçişleri (Olaylar/Sensörler)
+
+    // DEVREDE -> ALARM (Güvenlik İhlali)
+    DEVREDE -> ALARM [label="Hareket VEYA Kapı/Pencere Açık\n(İZİNSİZ GİRİŞ)", color="red", penwidth=2];
+
+    // DEVRE_DISI -> ALARM (Yangın/Duman İhlali - Daima Aktif)
+    DEVRE_DISI -> ALARM [label="Duman Algılandı\n(YANGIN TEHLİKESİ)", color="orange", style="dashed"];
+
+    // 4. Döngüler (Mevcut Durumda Kalma ve Eylemler)
+    
+    // DEVREDE döngüsü
+    DEVREDE -> DEVREDE [label="Normal Durumda Kal\n(Sürekli Sensör İzleme)", style=dotted];
+
+    // ALARM döngüsü (Tekrarlı Bildirim)
+    ALARM -> ALARM [label="Alarm Çalmaya Devam Ediyor\n& Acil Durum Bildirimi Gönder", style=dotted, color="red"];
+
+    // DEVRE_DISI döngüsü
+    DEVRE_DISI -> DEVRE_DISI [label="Sadece Duman İzleme", style=dotted];
+
+    // Başlangıç Okunun Belirlenmesi
+    node [shape=none, label="", width=0, height=0];
+    start [label="Başla"];
+    start -> DEVRE_DISI [label="Sistem Açılışı", color=blue];
+
+}

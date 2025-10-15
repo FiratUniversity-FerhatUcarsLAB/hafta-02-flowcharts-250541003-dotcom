@@ -1,50 +1,57 @@
-MAIN_LOOP:
-  while ATM is operational:
-    display "Kartınızı takınız"
-    card = waitForCardInsertion()
-    if card == null:
-      continue
+fonksiyon PINiDogrula(kart, girilenPIN):
+  kayitliHash = kartIcinPinHashGetir(kart)
+  geriDondur hash(girilenPIN) == kayitliHash
 
-    if not validateCard(card):
-      ejectCard(card)
-      display "Geçersiz kart"
-      continue
+fonksiyon ParaDagitimPlaniniHesapla(nakitEnvanteri, miktar):
+  // Açgözlü algoritma: büyükten küçüğe sayarak, envanteri dikkate al
+  kalan = miktar
+  plan = boş harita (banknot -> adet)
 
-    session = createSession(card)
-    session.startTime = currentTime()
+  için banknot in NOMINASYONLAR: // büyükten küçüğe sırayla
+    gerekenMax = taban(kalan / banknot)
+    mevcut = nakitEnvanteri[banknot] // yoksa 0 say
+    kullanilacak = min(gerekenMax, mevcut)
+    eğer kullanilacak > 0 ise:
+      plan[banknot] = kullanilacak
+      kalan = kalan - (kullanilacak * banknot)
 
-    // 1) PIN doğrulama
-    pinRetries = 0
-    authenticated = false
-    while pinRetries < MAX_PIN_RETRIES and not authenticated:
-      pin = promptUser("Lütfen PIN giriniz:")
-      if verifyPIN(card, pin):
-        authenticated = true
-      else:
-        pinRetries += 1
-        display "Hatalı PIN. Kalan deneme: " + (MAX_PIN_RETRIES - pinRetries)
-    if not authenticated:
-      blockCardOrAccount(card)
-      ejectCard(card)
-      display "Kart bloke edildi. Banka ile iletişime geçiniz."
-      logEvent("PIN_FAILED", card.id, session.id)
-      continue
+  eğer kalan == 0:
+    geriDondur plan
 
-    // 2) Hesap seçimi
-    accounts = fetchAccountsForCard(card)
-    selectedAccount = promptAccountSelection(accounts)
-    if selectedAccount == null:
-      ejectCard(card)
-      continue
+  // Açgözlü algoritma başarısızsa, daha derin (backtracking / dinamik programlama) dene
+  eğer AlternatifDagitimBul(nakitEnvanteri, miktar, plan):
+    geriDondur bulunanPlan
+  aksi halde:
+    geriDondur BASARISIZ
 
-    // 3) Menü: Para çekme
-    action = promptMenu(["Para Çekme", "Bakiye Sorgulama", "Para Yatırma", "İptal"])
-    if action == "İptal":
-      ejectCard(card)
-      continue
+fonksiyon AlternatifDagitimBul(nakitEnvanteri, miktar, mevcutPlan):
+  // Sınırlandırılmış backtracking: sınırlı sayıda kombinasyonu dener
+  // Uygun bir dağılım bulunursa, mevcutPlan doldurulur ve true döner
+  ...
 
-    if action == "Para Çekme":
-      handleWithdrawalFlow(session, selectedAccount)
+fonksiyon BankadanTahsilatIstegi(gonderenHesapId, miktar):
+  // Banka API çağrısı: tahsilat (debit)
+  cevap = BankaAPI.tahsilEt(gonderenHesapId, miktar)
+  eğer cevap.durum == "TAMAM":
+    geriDondur cevap.islemId
+  aksi halde:
+    geriDondur BASARISIZ
 
-    ejectCard(card)
-    display "İşlem tamamlandı. Kartınızı alınız."
+fonksiyon NakitDagit(dagitimPlani):
+  // Donanımla iletişim: her banknot türü için dağıtım komutları gönder
+  için banknot, adet in dagitimPlani:
+    sonuc = NakitMekanizmasi.dagit(banknot, adet)
+    eğer sonuc != TAMAM:
+      // Hangi banknotun verilip verilmediğini raporla
+      geriDondur false
+  geriDondur true
+
+fonksiyon BasarisizDagitimTelafisi(hesap, islemId, dagitimPlani):
+  // Bankadan para tahsil edilmişse, geri ödeme (reversal) istenir
+  geriOdeme = BankaAPI.geriAl(islemId)
+  eğer geriOdeme.durum == "TAMAM":
+    OlayKaydiEkle("GERI_ODEME_TAMAM", hesap.id, islemId)
+  aksi halde:
+    // Geri ödeme başarısızsa, müşteri hizmetleri bilgilendirilir
+    SorunKaydiOlustur(hesap.id, islemId, dagitimPlani)
+

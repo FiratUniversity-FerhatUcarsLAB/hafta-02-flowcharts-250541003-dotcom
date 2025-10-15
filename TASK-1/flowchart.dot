@@ -1,0 +1,42 @@
+digraph ATM_Withdrawal {
+  rankdir=LR;
+  node [shape=box, style=filled, color=lightblue];
+
+  Start [label="Kart Takıldı"];
+  ValidateCard [label="Kart Doğrulama"];
+  EnterPIN [label="PIN Girişi"];
+  PINCheck [label="PIN Doğrulama"];
+  SelectAccount [label="Hesap Seçimi"];
+  SelectAction [label="İşlem Seçimi"];
+  EnterAmount [label="Tutar Gir"];
+  CheckAmount [label="Limit/Bakiye Kontrol"];
+  CheckATM [label="ATM Nakit Durumu"];
+  Confirm [label="Kullanıcı Onayı"];
+  BankRequest [label="Banka Onayı"];
+  DispenseCash [label="Nakit Ver"];
+  PrintReceipt [label="Fiş Yazdır"];
+  EjectCard [label="Kartı İade Et"];
+  End [label="İşlem Bitti"];
+
+  // Hatalı durumlar
+  PINFail [label="PIN Hatalı/Kart Bloke", color=lightcoral];
+  RejectAmount [label="Geçersiz/Büyük Tutar", color=lightcoral];
+  ATMError [label="ATM Para Veremedi", color=lightcoral];
+  BankDecline [label="Banka Reddetti", color=lightcoral];
+
+  Start -> ValidateCard -> EnterPIN -> PINCheck;
+  PINCheck -> PINFail [label="3 kez yanlış", color=red];
+  PINCheck -> SelectAccount [label="Doğru"];
+  SelectAccount -> SelectAction;
+  SelectAction -> EnterAmount [label="Para Çekme"];
+  EnterAmount -> CheckAmount;
+  CheckAmount -> RejectAmount [label="Limit/Bakiye Yetersiz", color=red];
+  CheckAmount -> CheckATM [label="Uygun"];
+  CheckATM -> ATMError [label="Tutar verilemez", color=red];
+  CheckATM -> Confirm;
+  Confirm -> BankRequest;
+  BankRequest -> BankDecline [label="Reddet", color=red];
+  BankRequest -> DispenseCash;
+  DispenseCash -> ATMError [label="Hata", color=red];
+  DispenseCash -> PrintReceipt -> EjectCard -> End;
+}

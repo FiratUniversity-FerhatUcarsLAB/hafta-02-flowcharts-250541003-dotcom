@@ -1,0 +1,3 @@
+MELİKE KEKE
+250541003
+bir üniversite ders kayıt sisteminin iş mantığını iki farklı formatta ele aldık. İlk olarak, sistemin temel adımlarını (giriş, dönem kontrolü, önkoşul, kontenjan ve çakışma kontrolü) ve akışını detaylandıran Türkçe bir Pseudocode yazdık. Ardından, bu mantıksal akışı görselleştirmek amacıyla, adımlar ve karar noktaları arasındaki ilişkileri gösteren bir Akış Şeması oluşturmak için DOT (Graphviz) kodunu kullandık. Bu süreç, karmaşık bir sistemi hem metinsel hem de görsel olarak anlaşılır bir yapıya dönüştürmeyi sağladı.
